@@ -32,8 +32,15 @@ $app->add(function (Request $request, RequestHandlerInterface $handler): Respons
 
 // The RoutingMiddleware should be added after our CORS middleware so routing is performed first
 $app->addRoutingMiddleware();
+$app->addBodyParsingMiddleware();
 
-$app->get('/', Controller::class . ':nomeMetodo');
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+// Get the default error handler and register my custom error renderer.
+$errorHandler = $errorMiddleware->getDefaultErrorHandler()->forceContentType('application/json');
+
+
+$app->get('/api/user/lis-user/', UserController::class . ':list_user');
+$app->post('/api/user/insert-user/', UserController::class . ':insert_user');
 
 try {
     $app->run();
