@@ -38,9 +38,15 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 // Get the default error handler and register my custom error renderer.
 $errorHandler = $errorMiddleware->getDefaultErrorHandler()->forceContentType('application/json');
 
-
 $app->get('/api/user/lis-user/', UserController::class . ':list_user');
 $app->post('/api/user/insert-user/', UserController::class . ':insert_user');
+
+$app->post('/api/posts/list-posts/', PostsController::class . ':list_posts');
+$app->post('/api/posts/insert-posts/', PostsController::class . ':insert_posts');
+$app->post('/api/posts/update-status-post/', PostsController::class . ':update_status_post');
+
+$app->post('/api/category/list-category/', CategoryController::class . ':list_category');
+$app->post('/api/category/insert-category/', CategoryController::class . ':insert_category');
 
 try {
     $app->run();
