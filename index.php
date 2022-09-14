@@ -3,8 +3,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Factory\AppFactory;
+use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Routing\RouteCollectorProxy;
 use Slim\Routing\RouteContext;
+use Psr\Http\Message\ServerRequestInterface;
 
 header('Access-Control-Allow-Origin:*'); 
 header('Access-Control-Allow-Headers:X-Request-With');
@@ -38,15 +40,26 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 // Get the default error handler and register my custom error renderer.
 $errorHandler = $errorMiddleware->getDefaultErrorHandler()->forceContentType('application/json');
 
-$app->get('/api/user/lis-user/', UserController::class . ':list_user');
-$app->post('/api/user/insert-user/', UserController::class . ':insert_user');
 
-$app->post('/api/posts/list-posts/', PostsController::class . ':list_posts');
-$app->post('/api/posts/insert-posts/', PostsController::class . ':insert_posts');
-$app->post('/api/posts/update-status-post/', PostsController::class . ':update_status_post');
 
-$app->post('/api/category/list-category/', CategoryController::class . ':list_category');
-$app->post('/api/category/insert-category/', CategoryController::class . ':insert_category');
+$app->group('/api/user/', function (RouteCollectorProxy $group) {
+    $group->post('login/', UserController::class . ':login');
+    $group->post('insert-user/', UserController::class . ':insert_user');
+    $group->post('logout/', UserController::class . ':logout')->add(AuthMiddleware::class);
+    $group->get('list-user/', UserController::class . ':list_user')->add(AuthMiddleware::class);
+});
+
+
+$app->group('/api/posts/', function (RouteCollectorProxy $group) {
+    $group->post('list-posts/', PostsController::class . ':list_posts');
+    $group->post('insert-posts/', PostsController::class . ':insert_posts');
+    $group->post('update-status-post/', PostsController::class . ':update_status_post');
+})->add(AuthMiddleware::class);
+
+$app->group('/api/category/', function (RouteCollectorProxy $group) {
+    $group->post('list-category/', CategoryController::class . ':list_category');
+    $group->post('insert-category/', CategoryController::class . ':insert_category');
+})->add(AuthMiddleware::class);
 
 try {
     $app->run();

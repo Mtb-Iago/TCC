@@ -6,6 +6,8 @@ $dotenv->load();
 
 require_once __DIR__.'/app/config/config.php';
 
+require_once __DIR__.'/app/middlewares/authMiddleware.middleware.php';
+
 require_once __DIR__.'/app/interfaces/user.interface.php';
 require_once __DIR__.'/app/interfaces/posts.interface.php';
 require_once __DIR__.'/app/interfaces/category.interface.php';

@@ -1,13 +1,73 @@
 <?php
+session_start();
 use App\Interfaces\UserInterface;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class UserModel implements UserInterface
 {
+    
+    /**
+     * Responsible method to login user
+     * @author Iago <iagooliveira09@outlook.com>
+     */
+    static public function login(array $params = null): array
+    {
+
+        try {
+            $conn = new config();
+            
+            $pdo = $conn->conn();
+            $query = "SELECT * FROM user WHERE email = :email";
+            $data = $pdo->prepare($query);
+            $data->bindValue(':email', $params['email']);
+            
+            if (!$data->execute())
+            return ["status" => true, "http-code" => 200, "message" => "Users not found...", "data" => []];
+            $data = $data->fetch(PDO::FETCH_ASSOC);
+        
+            if (count($data) <= 0 || !password_verify($params['password'], $data['password']))
+                return ["status" => false, "http-code" => 400, "message" => "Email ou senha incorretos..", "data" => []];
+
+            // aqui vai gerar o token:
+            $payload = [
+                "email" => $data['email'],
+                "name"  => $data['name'],
+                "role_permission" => $data["role_permission"],
+                "id_user" => $data["id_user"],
+                'iat' => time(),
+                "exp" => time() + 60
+            ];
+
+            
+            $token = JWT::encode($payload ,$_ENV['JWT_KEY'], "HS256");
+
+            $response['token'] = $token;
+            $_SESSION['token'] = $token;
+            return ["status" => true, "http-code" => 200, "message" => "", "data" => $response];
+        }catch (\Throwable $th) {
+                throw new Exception($th->getMessage(), $th->getCode());
+            }
+    }
+    /**
+     * Responsible method to logout user
+     * @author Iago <iagooliveira09@outlook.com>
+     */
+    static public function logout(array $params = null): array
+    {
+
+        try {
+            session_unset();
+            session_destroy();
+            return ["status" => true, "http-code" => 200, "message" => "", "data" => []];
+        }catch (\Throwable $th) {
+                throw new Exception($th->getMessage(), $th->getCode());
+            }
+    }
     /**
      * Responsible method to list user
      * @author Iago <iagooliveira09@outlook.com>
      */
-
     static public function list_user(array $params = null): array
     {
 
