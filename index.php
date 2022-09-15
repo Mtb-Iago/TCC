@@ -46,7 +46,7 @@ $app->group('/api/user/', function (RouteCollectorProxy $group) {
     $group->post('login/', UserController::class . ':login');
     $group->post('insert-user/', UserController::class . ':insert_user');
     $group->post('logout/', UserController::class . ':logout')->add(AuthMiddleware::class);
-    $group->get('list-user/', UserController::class . ':list_user')->add(AuthMiddleware::class);
+    $group->post('list-user/', UserController::class . ':list_user')->add(AuthMiddleware::class);
 });
 
 

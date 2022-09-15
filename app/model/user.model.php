@@ -25,8 +25,8 @@ class UserModel implements UserInterface
             if (!$data->execute())
             return ["status" => true, "http-code" => 200, "message" => "Users not found...", "data" => []];
             $data = $data->fetch(PDO::FETCH_ASSOC);
-        
-            if (count($data) <= 0 || !password_verify($params['password'], $data['password']))
+            
+            if (!$data ||@count($data) <= 0 || !password_verify($params['password'], $data['password']))
                 return ["status" => false, "http-code" => 400, "message" => "Email ou senha incorretos..", "data" => []];
 
             // aqui vai gerar o token:
@@ -36,7 +36,7 @@ class UserModel implements UserInterface
                 "role_permission" => $data["role_permission"],
                 "id_user" => $data["id_user"],
                 'iat' => time(),
-                "exp" => time() + 60
+                "exp" => time() + 5000
             ];
 
             
@@ -57,6 +57,7 @@ class UserModel implements UserInterface
     {
 
         try {
+            var_dump($_SERVER["REDIRECT_HTTP_AUTHORIZATION"]);
             session_unset();
             session_destroy();
             return ["status" => true, "http-code" => 200, "message" => "", "data" => []];
@@ -72,7 +73,7 @@ class UserModel implements UserInterface
     {
 
         try {
-
+            
             //Case search
             @$params['user_id'] ? $id_user = $params['user_id'] : $id_user = "";
 
@@ -80,7 +81,11 @@ class UserModel implements UserInterface
             $conn = new config();
 
             $pdo = $conn->conn();
-            $query = "SELECT * FROM user $filter_search";
+            $query = "SELECT user.id_user AS ID_USER,
+                             user.name AS NAME,
+                             user.email AS EMAIL,
+                             user.role_permission AS ROLE_PERMISSION
+                         FROM user $filter_search";
 
             $data = $pdo->query($query);
 
@@ -129,7 +134,7 @@ class UserModel implements UserInterface
             $res->bindValue(':name',            $params['name']);
             $res->bindValue(':email',           $params['email']);
             $res->bindValue(':password',        $password);
-            $res->bindValue(':role_permission', 2);
+            $res->bindValue(':role_permission', 'client');
 
             if (!$res->execute())
                 return ["status" => false, "http-code" => 400, "message" => "Usuário não cadastrado", "data" => []];

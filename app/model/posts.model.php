@@ -20,14 +20,17 @@ class PostsModel implements PostsInterface
             @$params['id_category'] ? $id_category = $params['id_category'] : $id_category = "";
 
             $id_post ? $filter_search = " WHERE posts.id_post in ($id_post)" : $filter_search = "";
-            $id_category ? $filter_search = " WHERE posts.id_category in ($id_category)" : $filter_search = $filter_search;
+            $id_category ? $filter_search = " WHERE posts.id_category in ($id_category)" : $filter_search;
+
             $conn = new config();
 
             $pdo = $conn->conn();
             $query = "SELECT 
+                            user.name,
                             posts.id_post,
                             posts.id_user,
                             posts.id_category,
+                            COALESCE(category_posts.name_category),
                             posts.title_post,
                             posts.post,
                             posts.accept_post,
@@ -38,7 +41,10 @@ class PostsModel implements PostsInterface
                             posts.created_at
                              FROM posts 
                             LEFT JOIN archives ON archives.id_post = posts.id_post
+                            LEFT JOIN category_posts ON category_posts.id_category = posts.id_category
+                            LEFT JOIN user ON  posts.id_user = user.id_user
                         $filter_search
+                        GROUP BY posts.id_post
                     ";
 
             $data = $pdo->query($query);
@@ -62,7 +68,6 @@ class PostsModel implements PostsInterface
         $data_finally = [];
         $data_convert = array_unique($data_convert, SORT_REGULAR);
         
-    
         foreach ($data as $key => $value) {
             foreach ($data_convert as $key1 => $id_post) {
                 if ($id_post == $value["archives_id_post"]) {

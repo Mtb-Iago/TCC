@@ -18,32 +18,33 @@ class AuthMiddleware
     public function __invoke(Request $request, RequestHandlerInterface $handler) : Response 
     {
         try {
-            $token = (array)JWT::decode(@$_SESSION['token'] ? $_SESSION['token'] : "", new Key($_ENV['JWT_KEY'], 'HS256'));
+            $token = str_replace("Bearer ", "", $_SERVER["REDIRECT_HTTP_AUTHORIZATION"]);
+            $token = (array)JWT::decode($token ? $token : "", new Key($_ENV['JWT_KEY'], 'HS256'));
         } catch (\Throwable $th) {
             switch ($th->getMessage()) {
                 case 'Malformed UTF-8 characters':
                     session_unset();
                     session_destroy();
-                    http_response_code(400);
-                    exit(json_encode(["status" => false, "http-code" => 400, "message" => "Token Inválido..", "data" => []]));
+                    header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
+                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                     break;
                 case 'Expired token':
                     session_unset();
                     session_destroy();
-                    http_response_code(400);
-                    exit(json_encode(["status" => false, "http-code" => 400, "message" => "Token expirado..", "data" => []]));
+                    header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
+                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token expirado..", "data" => []]));
                     break;
                 case 'Signature verification failed':
                     session_unset();
                     session_destroy();
-                    http_response_code(400);
-                    exit(json_encode(["status" => false, "http-code" => 400, "message" => "Token Inválido..", "data" => []]));
+                    header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
+                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                     break;
                 case 'Wrong number of segments':
                     session_unset();
                     session_destroy();
-                    http_response_code(400);
-                    exit(json_encode(["status" => false, "http-code" => 400, "message" => "Não existe Token..", "data" => []]));
+                    header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
+                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Não existe Token..", "data" => []]));
                     break;
                 default:
                     throw new Exception($th->getMessage(), $th->getCode());
@@ -51,7 +52,7 @@ class AuthMiddleware
             }  
         }
         $response = $handler->handle($request);
-        $response->getBody()->write(json_encode(["payload" => $token]));
+        //$response->getBody()->write(json_encode(["payload" => $token]));
         return $response;
     }
 
