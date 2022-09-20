@@ -18,9 +18,11 @@ class PostsModel implements PostsInterface
             //Case search
             @$params['id_post'] ? $id_post = $params['id_post']             : $id_post = "";
             @$params['id_category'] ? $id_category = $params['id_category'] : $id_category = "";
+            @$params['tag'] ? $tag = $params['tag'] : $tag = "";
 
             $id_post ? $filter_search = " WHERE posts.id_post in ($id_post)" : $filter_search = "";
             $id_category ? $filter_search = " WHERE posts.id_category in ($id_category)" : $filter_search;
+            $tag ? $filter_search = " WHERE tags.tag LIKE '%$tag%' " : $filter_search;
 
             $conn = new config();
 
@@ -30,7 +32,7 @@ class PostsModel implements PostsInterface
                             posts.id_post,
                             posts.id_user,
                             posts.id_category,
-                            COALESCE(category_posts.name_category),
+                            category_posts.name_category,
                             posts.title_post,
                             posts.post,
                             posts.accept_post,
@@ -38,13 +40,16 @@ class PostsModel implements PostsInterface
                             archives.id_archive,
                             archives.name_archive,
                             archives.url_archive,
+                            tags.id_post as tag_id_post,
+                            tags.id_tag,
+                            tags.tag,
                             posts.created_at
                              FROM posts 
                             LEFT JOIN archives ON archives.id_post = posts.id_post
                             LEFT JOIN category_posts ON category_posts.id_category = posts.id_category
                             LEFT JOIN user ON  posts.id_user = user.id_user
+                            LEFT JOIN tags ON  tags.id_post = posts.id_post
                         $filter_search
-                        
                     ";
 
             $data = $pdo->query($query);
@@ -52,55 +57,71 @@ class PostsModel implements PostsInterface
             if (!$data->execute())
                 return ["status" => true, "http-code" => 200, "message" => "Posts not found...", "data" => []];
             $data = $data->fetchAll(PDO::FETCH_ASSOC);
+        
+
+
+            if (count($data) <= 0)
+                return ["status" => true, "http-code" => 200, "message" => "Posts not found...", "data" => []];
+
+
+            foreach ($data as $value) {
+                $data_convert[] = $value["id_post"];
+            }
+            $data_finally = [];
+            $data_convert = array_unique($data_convert, SORT_REGULAR);
+            
+            foreach ($data as $key => $value) {
+                foreach ($data_convert as $key1 => $id_post) {
+                    if ($id_post == $value["archives_id_post"]) {
+                        $archives[$key1][] = [
+                            "id_archive" => $value["id_archive"],
+                            "name_archive" => $value["name_archive"],
+                            "url_photos" => $value["url_archive"]
+                        ];
+                    }
+
+                    if ($id_post == $value["tag_id_post"]) {
+                        $tags[$key1] = [
+                            "id_tag_post" => $value["id_tag"],
+                            "tag" => $value["tag"]
+                        ];
+                    }
+                    
+                    if ($id_post == $value["id_post"]) {
+                        $data_finally[$key1] = [
+                            "id_post" => $value["id_post"],
+                            "id_category" => $value["id_category"],
+                            "name_category" => $value["name_category"],
+                            "id_user" => $value["id_user"],
+                            "name_user" => $value["name"],
+                            "title_post" => $value["title_post"],
+                            "post" => $value["post"],
+                            "accept_post" => $value["accept_post"],
+                            "tags_post" => @$tags,
+                            "url_archives" => @$archives[$key1],
+                            "created_at" => $value["created_at"]
+                        ];
+                    }
+                }
+            }
+
+            foreach ($data_finally as $key => $value) {
+                if ($data_finally[$key]["url_archives"]) {
+                    $data_finally[$key]["url_archives"] = array_values(array_unique($data_finally[$key]["url_archives"], SORT_REGULAR));
+                }
+                if ($data_finally[$key]["tags_post"]) {
+                    $data_finally[$key]["tags_post"] = array_values(array_unique($data_finally[$key]["tags_post"], SORT_REGULAR));
+                }
+            }
+
+            $data = array_values($data_finally);
+
+            return ["status" => true, "http-code" => 200, "message" => "", "data" => $data];
+
         }
         catch (\Throwable $th) {
             throw new Exception($th->getMessage(), $th->getCode());
         }
-
-
-        if (count($data) <= 0)
-            return ["status" => true, "http-code" => 200, "message" => "Posts not found...", "data" => []];
-
-
-        foreach ($data as $value) {
-            $data_convert[] = $value["id_post"];
-        }
-        $data_finally = [];
-        $data_convert = array_unique($data_convert, SORT_REGULAR);
-        
-        foreach ($data as $key => $value) {
-            foreach ($data_convert as $key1 => $id_post) {
-                if ($id_post == $value["archives_id_post"]) {
-                    $archives[$key1][] = [
-                        "id_archive" => $value["id_archive"],
-                        "name_archive" => $value["name_archive"],
-                        "url_photos" => $value["url_archive"]
-                    ];
-                }
-                if ($id_post == $value["id_post"]) {
-                    $data_finally[$key1] = [
-                        "id_post" => $value["id_post"],
-                        "id_category" => $value["id_category"],
-                        "id_user" => $value["id_user"],
-                        "title_post" => $value["title_post"],
-                        "post" => $value["post"],
-                        "accept_post" => $value["accept_post"],
-                        "created_at" => $value["created_at"],
-                        "url_archives" => @$archives[$key1]
-                    ];
-                }
-            }
-        }
-
-        foreach ($data_finally as $key => $value) {
-            if ($data_finally[$key]["url_archives"]) {
-                $data_finally[$key]["url_archives"] = array_values(array_unique($data_finally[$key]["url_archives"], SORT_REGULAR));
-            }
-        }
-
-        $data = array_values($data_finally);
-
-        return ["status" => true, "http-code" => 200, "message" => "", "data" => $data];
 
     }
 
