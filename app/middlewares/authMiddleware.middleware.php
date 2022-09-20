@@ -23,26 +23,22 @@ class AuthMiddleware
         } catch (\Throwable $th) {
             switch ($th->getMessage()) {
                 case 'Malformed UTF-8 characters':
-                    session_unset();
-                    session_destroy();
+                    
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
                     exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                     break;
                 case 'Expired token':
-                    session_unset();
-                    session_destroy();
+                    
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
                     exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token expirado..", "data" => []]));
                     break;
                 case 'Signature verification failed':
-                    session_unset();
-                    session_destroy();
+                    
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
                     exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                     break;
                 case 'Wrong number of segments':
-                    session_unset();
-                    session_destroy();
+                    
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
                     exit(json_encode(["status" => false, "http-code" => 401, "message" => "Não existe Token..", "data" => []]));
                     break;

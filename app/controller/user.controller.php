@@ -28,24 +28,6 @@ class UserController
         }
     }
 
-    public function logout(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
-    {    
-        try {
-            $request->getParsedBody() ? $params = $request->getParsedBody() : $params = null;
-            $result = $this->user->logout($params);
-            if ($result['status'] != 200) {
-                $response->getBody()->write(json_encode($result));
-                return $response->withStatus(400)->withHeader('Content-type', 'application/json');
-            }
-            $response->getBody()->write(json_encode($result));
-
-            return $response->withStatus(200)->withHeader('Content-type', 'application/json');
-        } catch (\Throwable $th) {
-            $response->getBody()->write(throw $th);
-            return $response->withStatus(400)->withHeader('Content-type', 'application/json');
-        }
-    }
-
     public function list_user(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {    
         try {

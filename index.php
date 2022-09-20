@@ -8,7 +8,7 @@ use Slim\Routing\RouteCollectorProxy;
 use Slim\Routing\RouteContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-header('Access-Control-Allow-Origin:*'); 
+header('Access-Control-Allow-Origin:*');
 header('Access-Control-Allow-Headers:X-Request-With');
 
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -63,7 +63,8 @@ $app->group('/api/category/', function (RouteCollectorProxy $group) {
 
 try {
     $app->run();
-} catch (\Throwable $th) {
+}
+catch (\Throwable $th) {
     print_r($th);
     exit(json_encode(["resposta" => "Erro, página não encontrada.."]));
 }

@@ -1,4 +1,4 @@
 vendor/
 .env
 composer.lock
-app/archives/*
+app/archives/*.jpg

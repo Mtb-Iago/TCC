@@ -163,6 +163,10 @@ class PostsModel implements PostsInterface
                 $id_post = $pdo->lastInsertId();
                 PostsModel::image_base64_arq($id_post, $file);
             }
+
+            if ($params['tag']) {
+                PostsModel::insert_tag($id_post, $params['tag']);
+            }
             return ["status" => true, "http-code" => 200, "message" => "Post registrado com sucesso!", "data" => []];
 
         }
@@ -219,6 +223,45 @@ class PostsModel implements PostsInterface
         }
 
     }
+
+
+    /**
+     * Responsible method to register tag in post
+     * @author Iago <iagooliveira09@outlook.com>
+     * @param int $id_post
+     * @param string $tag
+     * @return void
+     */
+    static public function insert_tag(int $id_post, string $tag) : void
+    {
+
+        if (!$id_post || !@$tag) exit;
+
+        try {
+            $conn = new config();
+            $pdo = $conn->conn();
+
+            $query = "INSERT INTO tags 
+                        (id_post, tag) values
+                        (:id_post, :tag)
+                    ";
+
+            $res = $pdo->prepare($query);
+
+            $res->bindValue(':id_post', $id_post);
+            $res->bindValue(':tag',     $tag);
+
+            $res->execute();
+
+        }
+        catch (\Throwable $th) {
+            throw new Exception($th->getMessage(), $th->getCode());
+        }
+
+
+        
+    }
+
 
     /**
      * Responsible method to register post
