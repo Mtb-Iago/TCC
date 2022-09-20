@@ -44,7 +44,7 @@ class PostsModel implements PostsInterface
                             LEFT JOIN category_posts ON category_posts.id_category = posts.id_category
                             LEFT JOIN user ON  posts.id_user = user.id_user
                         $filter_search
-                        GROUP BY posts.id_post
+                        
                     ";
 
             $data = $pdo->query($query);
