@@ -38,7 +38,7 @@ class UserModel implements UserInterface
             ];
 
             
-            $token = 'Bearer '.JWT::encode($payload ,$_ENV['JWT_KEY'], "HS256");
+            $token = JWT::encode($payload ,$_ENV['JWT_KEY'], "HS256");
 
             $response['token'] = $token;
             return ["status" => true, "http-code" => 200, "message" => "", "data" => $response];

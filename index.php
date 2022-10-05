@@ -38,7 +38,8 @@ $app->addBodyParsingMiddleware();
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 // Get the default error handler and register my custom error renderer.
-$errorHandler = $errorMiddleware->getDefaultErrorHandler()->forceContentType('application/json');
+$errorMiddleware->getDefaultErrorHandler()->forceContentType('application/json');
+$errorHandler = $errorMiddleware->getDefaultErrorHandler();
 
 
 
@@ -58,8 +59,8 @@ $app->group('/api/posts/', function (RouteCollectorProxy $group) {
 
 $app->group('/api/category/', function (RouteCollectorProxy $group) {
     $group->post('list-category/', CategoryController::class . ':list_category');
-    $group->post('insert-category/', CategoryController::class . ':insert_category');
-})->add(AuthMiddleware::class);
+    $group->post('insert-category/', CategoryController::class . ':insert_category')->add(AuthMiddleware::class);
+});
 
 try {
     $app->run();

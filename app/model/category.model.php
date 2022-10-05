@@ -60,12 +60,14 @@ class CategoryModel implements CategoryInterface
             $pdo = $conn->conn();
 
             $query = "INSERT INTO category_posts 
-                        (name_category) values
-                        (:name_category)
+                        (name_category, author, description) values
+                        (:name_category, :author, :description)
                     ";
             $res = $pdo->prepare($query);
             
             $res->bindValue(':name_category',$params['name_category']);
+            $res->bindValue(':author',$params['author']);
+            $res->bindValue(':description',$params['description']);
             
             if (!$res->execute())
                 return ["status" => false, "http-code" => 400, "message" => "Categoria não cadastrado", "data" => []];
