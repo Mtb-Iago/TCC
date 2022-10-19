@@ -23,7 +23,7 @@ class CategoryModel implements CategoryInterface
             $conn = new config();
 
             $pdo = $conn->conn();
-            $query = "SELECT * FROM category_posts $filter_search";
+            $query = "SELECT * FROM category_posts $filter_search ORDER BY id_category DESC";
 
             $data = $pdo->query($query);
 

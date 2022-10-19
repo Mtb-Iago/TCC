@@ -50,6 +50,8 @@ class PostsModel implements PostsInterface
                             LEFT JOIN user ON  posts.id_user = user.id_user
                             LEFT JOIN tags ON  tags.id_post = posts.id_post
                         $filter_search
+
+                        ORDER BY posts.id_post DESC
                     ";
 
             $data = $pdo->query($query);
@@ -138,7 +140,7 @@ class PostsModel implements PostsInterface
             return ["status" => false, "http-code" => 400, "message" => "Por favor, preencha os campos...", "data" => []];
         }
         
-        @$params['files'] ? $file = $params['files'] : $file = null;
+        @$params['files'][0]['file'] ? $file = $params['files'] : $file = null;
 
         try {
             $conn = new config();
@@ -159,8 +161,8 @@ class PostsModel implements PostsInterface
             if (!$res->execute())
                 return ["status" => false, "http-code" => 400, "message" => "Post não cadastrado", "data" => []];
             
+            $id_post = $pdo->lastInsertId();
             if (@$file) {
-                $id_post = $pdo->lastInsertId();
                 PostsModel::image_base64_arq($id_post, $file);
             }
 
@@ -177,9 +179,6 @@ class PostsModel implements PostsInterface
             }
             throw new Exception($th->getMessage(), $th->getCode());
         }
-
-
-        
     }
 
     /**
@@ -216,7 +215,7 @@ class PostsModel implements PostsInterface
 
             $pdo->commit();
 
-            return ["status" => true, "http-code" => 200, "message" => "Post aceito com sucesso!", "data" => []];
+            return ["status" => true, "http-code" => 200, "message" => "Visibilidade de post alterada com sucesso!", "data" => []];
         }
         catch (\Throwable $th) {
             throw new Exception($th->getMessage(), $th->getCode());
