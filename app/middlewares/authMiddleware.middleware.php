@@ -25,41 +25,24 @@ class AuthMiddleware
                 case 'Malformed UTF-8 characters':
                     
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
-                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
-                    break;
+                    die(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                 case 'Expired token':
                     
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
-                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token expirado..", "data" => []]));
-                    break;
+                    die(json_encode(["status" => false, "http-code" => 401, "message" => "Token expirado..", "data" => []]));
                 case 'Signature verification failed':
                     
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
-                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
-                    break;
+                    die(json_encode(["status" => false, "http-code" => 401, "message" => "Token Inválido..", "data" => []]));
                 case 'Wrong number of segments':
                     
                     header( 'HTTP/1.0 401 Não Autorizado, favor realizar novo login' );
-                    exit(json_encode(["status" => false, "http-code" => 401, "message" => "Não existe Token..", "data" => []]));
-                    break;
+                    die(json_encode(["status" => false, "http-code" => 401, "message" => "Não existe Token..", "data" => []]));
                 default:
                     throw new Exception($th->getMessage(), $th->getCode());
-                    break;
             }  
         }
         $response = $handler->handle($request);
-        //$response->getBody()->write(json_encode(["payload" => $token]));
         return $response;
-    }
-
-    public static function teste(Request $request, RequestHandlerInterface $handler, $app)  {
-        $response = $handler->handle($request);
-        $dateOrTime = (string) $response->getBody();
-    
-        $response = $app->getResponseFactory()->createResponse();
-        $response->getBody()->write('It is now ' . $dateOrTime . '. Enjoy!');
-    
-        return $response;
-
     }
 }

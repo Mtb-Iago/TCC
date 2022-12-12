@@ -169,7 +169,7 @@ class PostsModel implements PostsInterface
             if ($params['tag']) {
                 PostsModel::insert_tag($id_post, $params['tag']);
             }
-            return ["status" => true, "http-code" => 200, "message" => "Post registrado com sucesso!", "data" => []];
+            return ["status" => true, "http-code" => 200, "message" => "Post registrado com sucesso. Seu post passará por moderação e após aprovação ficará visivél", "data" => []];
 
         }
         catch (\Throwable $th) {
@@ -271,7 +271,7 @@ class PostsModel implements PostsInterface
      */
     static public function image_base64_arq($id_post, $photos_base64)
     {
-
+        chmod (PATH_UPLOAD_ARCHIVES, 755);
         $conn = new config();
         $pdoo = $conn->conn();
 
